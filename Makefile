@@ -4,8 +4,8 @@ start-zookeeper:
 start-kafka:
 	kafka-server-start /usr/local/etc/kafka/server.properties
 
-run-confluentic-producer:
-	go run confluentic/producer/main.go
+run-producer:
+	go run cmd/producer/main.go
 
-run-confluentic-consumer:
-	go run confluentic/consumer/main.go
+run-consumer:
+	go run cmd/consumer/main.go

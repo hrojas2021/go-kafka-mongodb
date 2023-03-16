@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-
 	cf := config.LoadViperConfig()
 	db, err := database.Connect(cf)
 	if err != nil {
