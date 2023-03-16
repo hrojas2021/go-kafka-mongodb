@@ -72,11 +72,10 @@ func (k *kafkaC) readMessagesFromKafka(db *database.DB) error {
 			if err != nil {
 				break
 			}
-			fmt.Printf("%+v\n", job)
-			// err = db.SaveJob(&job)
-			// if err != nil {
-			// 	break
-			// }
+			err = db.SaveJob(&job)
+			if err != nil {
+				break
+			}
 		} else {
 			log.Printf("consumer error: %v (%v)\n", err, msg)
 			break

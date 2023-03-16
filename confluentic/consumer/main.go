@@ -11,11 +11,11 @@ import (
 func main() {
 
 	cf := config.LoadViperConfig()
-	_, err := database.Connect(cf)
+	db, err := database.Connect(cf)
 	if err != nil {
 		log.Fatal("unable to connecto to mongoDB ", err)
 	}
-	handler, err := confluentic.NewConsumerHandler(cf, nil)
+	handler, err := confluentic.NewConsumerHandler(cf, db)
 	if err != nil {
 		log.Fatal("unable to create a kafka consumer handler ", err)
 	}
