@@ -14,6 +14,7 @@ const (
 
 type Configuration struct {
 	PORT             string
+	SERVERTIMEOUT    int
 	KAFKAURL         string
 	KAFKASERVER      string
 	KAFKATOPIC       string
