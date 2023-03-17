@@ -8,20 +8,21 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/config"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/database"
+	"github.com/hrojas2021/go-kafka-mongodb/pkg/iface"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/model"
 )
 
 type kafkaC struct {
 	*kafka.Consumer
-	*config.Configuration
 }
 
 type consumerHandler struct {
+	config *config.Configuration
 	db     *database.DB
 	kafkaC kafkaC
 }
 
-func NewConsumerHandler(cf *config.Configuration, db *database.DB) (*consumerHandler, error) {
+func NewConsumerHandler(cf *config.Configuration, db *database.DB) (iface.ConsumerHandler, error) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		cf.KAFKASERVER:      cf.KAFKAURL,
 		"group.id":          cf.KAFKAGROUPID,
@@ -34,32 +35,33 @@ func NewConsumerHandler(cf *config.Configuration, db *database.DB) (*consumerHan
 
 	return &consumerHandler{
 		db:     db,
-		kafkaC: kafkaC{c, cf},
+		config: cf,
+		kafkaC: kafkaC{c},
 	}, nil
-
 }
 
-func (h *consumerHandler) Subscribe() error {
-	return h.kafkaC.subscribe()
+func (h *consumerHandler) ReadMessagesFromKafka() error {
+	return h.kafkaC.readMessagesFromKafka(h)
 }
 
 func (h *consumerHandler) Close() error {
 	return h.kafkaC.Close()
 }
 
-func (h *consumerHandler) ReadMessagesFromKafka() error {
-	return h.kafkaC.readMessagesFromKafka(h.db)
+func (h *consumerHandler) Subscribe() error {
+	topics := []string{h.config.KAFKATOPIC}
+	return h.kafkaC.subscribe(topics)
 }
 
-func (k *kafkaC) subscribe() error {
-	err := k.SubscribeTopics([]string{k.KAFKATOPIC}, nil)
+func (k *kafkaC) subscribe(topics []string) error {
+	err := k.SubscribeTopics(topics, nil)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (k *kafkaC) readMessagesFromKafka(db *database.DB) error {
+func (k *kafkaC) readMessagesFromKafka(h *consumerHandler) error {
 	var err error
 	fmt.Println("Start reading Kafka messages")
 	for {
@@ -67,12 +69,12 @@ func (k *kafkaC) readMessagesFromKafka(db *database.DB) error {
 
 		if err == nil {
 			var job model.Job
-			fmt.Printf("\nReceived from Kafka partition: %s\n", msg.TopicPartition)
+			fmt.Printf("\nReceived msg from Kafka partition: %s\n", msg.TopicPartition)
 			err = json.Unmarshal(msg.Value, &job)
 			if err != nil {
 				break
 			}
-			err = db.SaveJob(&job)
+			err = h.db.SaveJob(&job)
 			if err != nil {
 				break
 			}

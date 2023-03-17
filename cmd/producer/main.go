@@ -13,12 +13,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/config"
+	"github.com/hrojas2021/go-kafka-mongodb/pkg/iface"
+	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/confluentic"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/sarama"
 )
 
 func main() {
 	cf := config.LoadViperConfig()
-	handler, err := sarama.NewProducerHandler(cf)
+	handler, err := getBroker(cf)
 	if err != nil {
 		log.Fatal("unable to create a kafka producer handler ", err)
 	}
@@ -47,4 +49,18 @@ func main() {
 		log.Fatal(err)
 	}
 
+}
+
+func getBroker(cf *config.Configuration) (iface.ProducerHandler, error) {
+	var broker iface.ProducerHandler
+	var err error
+
+	switch cf.BROKER {
+	case config.Sarama:
+		broker, err = sarama.NewProducerHandler(cf)
+	default:
+		broker, err = confluentic.NewProducerHandler(cf)
+	}
+
+	return broker, err
 }

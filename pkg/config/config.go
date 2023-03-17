@@ -6,6 +6,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	Sarama      = "sarama"
+	Confluentic = "confluentic"
+	Segmentio   = "segmentio"
+)
+
 type Configuration struct {
 	PORT             string
 	KAFKAURL         string
@@ -17,6 +23,7 @@ type Configuration struct {
 	MONGODB          string
 	MONGOCOLLECTION  string
 	MONGOTIMEOUT     int
+	BROKER           string
 }
 
 // TODO: add replacer . by _
