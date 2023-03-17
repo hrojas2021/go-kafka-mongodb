@@ -13,12 +13,12 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/config"
-	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/confluentic"
+	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/sarama"
 )
 
 func main() {
 	cf := config.LoadViperConfig()
-	handler, err := confluentic.NewProducerHandler(cf)
+	handler, err := sarama.NewProducerHandler(cf)
 	if err != nil {
 		log.Fatal("unable to create a kafka producer handler ", err)
 	}
