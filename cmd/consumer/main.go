@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal("unable to create a kafka consumer handler ", err)
 	}
-	// err = handler.Subscribe()
+	// err = handler.Subscribe() // Confluentic
 	// if err != nil {
 	// 	log.Fatal("unable to subscribe the topics ", err)
 	// }
