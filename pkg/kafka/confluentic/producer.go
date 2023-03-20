@@ -67,7 +67,11 @@ func (k *kafkaP) saveJobToKafka(job model.Job) error {
 		}, nil)
 	}
 
-	// k.Close()
 	log.Println("The job event has been created successfully")
+	return nil
+}
+
+func (h *producerHandler) Close() error {
+	h.kafkaP.Close()
 	return nil
 }

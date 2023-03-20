@@ -34,7 +34,6 @@ func NewProducerHandler(cf *config.Configuration) (*producerHandler, error) {
 	}, nil
 }
 
-// TODO:  move this to handlers folder and call with interface  saveJobToKafka
 func (h *producerHandler) JobsPostHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -74,7 +73,9 @@ func (k *kafkaP) saveJobToKafka(job model.Job) error {
 		return err
 	}
 
-	// k.Close()
-
 	return nil
+}
+
+func (h *producerHandler) Close() error {
+	return h.kafkaP.Close()
 }

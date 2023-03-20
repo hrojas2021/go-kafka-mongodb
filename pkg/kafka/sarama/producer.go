@@ -70,7 +70,11 @@ func (k *kafkaP) saveJobToKafka(job model.Job) error {
 	if err != nil {
 		return err
 	}
-	// k.Close()
+
 	log.Printf("The job event has been created in partition %d and offset %d \n", partition, offset)
 	return nil
+}
+
+func (h *producerHandler) Close() error {
+	return h.kafkaP.Close()
 }
