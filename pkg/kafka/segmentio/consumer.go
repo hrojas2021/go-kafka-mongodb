@@ -48,7 +48,7 @@ func (h *consumerHandler) Subscribe() error {
 }
 
 func (k *kafkaC) readMessagesFromKafka(h *consumerHandler) error {
-	fmt.Println("Start reading Kafka messages in SEGMENTIO")
+	fmt.Println("Start reading Kafka messages in")
 	var err error
 	for {
 		msg, err := k.ReadMessage(context.Background())

@@ -72,7 +72,8 @@ func (k *kafkaP) saveJobToKafka(job model.Job) error {
 	if err != nil {
 		return err
 	}
-
+	k.counter++
+	log.Printf("The job event has been created successfully \n")
 	return nil
 }
 

@@ -16,6 +16,7 @@ import (
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/iface"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/confluentic"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/sarama"
+	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/segmentio"
 )
 
 func main() {
@@ -62,8 +63,10 @@ func getBroker(cf *config.Configuration) (iface.ProducerHandler, error) {
 	switch cf.BROKER {
 	case config.Sarama:
 		broker, err = sarama.NewProducerHandler(cf)
-	default:
+	case config.Confluentic:
 		broker, err = confluentic.NewProducerHandler(cf)
+	default:
+		broker, err = segmentio.NewProducerHandler(cf)
 	}
 
 	return broker, err
