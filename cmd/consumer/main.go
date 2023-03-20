@@ -8,6 +8,7 @@ import (
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/iface"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/confluentic"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/sarama"
+	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/segmentio"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 	if err != nil {
 		log.Fatal("unable to connecto to mongoDB ", err)
 	}
-	// handler, err := sarama.NewConsumerHandler(cf, db)
+
 	handler, err := getBroker(cf, db)
 	if err != nil {
 		log.Fatal("unable to create a kafka consumer handler ", err)
@@ -45,8 +46,10 @@ func getBroker(cf *config.Configuration, db *database.DB) (iface.ConsumerHandler
 	switch cf.BROKER {
 	case config.Sarama:
 		broker, err = sarama.NewConsumerHandler(cf, db)
-	default:
+	case config.Confluentic:
 		broker, err = confluentic.NewConsumerHandler(cf, db)
+	default:
+		broker, err = segmentio.NewConsumerHandler(cf, db)
 	}
 
 	return broker, err

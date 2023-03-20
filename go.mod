@@ -6,6 +6,7 @@ require (
 	github.com/Shopify/sarama v1.38.1
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/gorilla/mux v1.8.0
+	github.com/segmentio/kafka-go v0.4.39
 	github.com/spf13/viper v1.15.0
 	go.mongodb.org/mongo-driver v1.11.2
 )

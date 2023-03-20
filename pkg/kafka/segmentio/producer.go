@@ -1,14 +1,16 @@
-package confluentic
+package segmentio
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/config"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/model"
+	"github.com/segmentio/kafka-go"
 )
 
 type producerHandler struct {
@@ -16,21 +18,23 @@ type producerHandler struct {
 }
 
 type kafkaP struct {
-	*kafka.Producer
+	*kafka.Writer
 	*config.Configuration
+	counter int
 }
 
 func NewProducerHandler(cf *config.Configuration) (*producerHandler, error) {
-	p, err := kafka.NewProducer(&kafka.ConfigMap{cf.KAFKASERVER: cf.KAFKAURL})
-	if err != nil {
-		return nil, err
-	}
+	w := kafka.NewWriter(kafka.WriterConfig{
+		Brokers: []string{cf.KAFKAURL},
+		Topic:   cf.KAFKATOPIC,
+	})
 
 	return &producerHandler{
-		kafkaP: kafkaP{p, cf},
+		kafkaP: kafkaP{w, cf, 1},
 	}, nil
 }
 
+// TODO:  move this to handlers folder and call with interface  saveJobToKafka
 func (h *producerHandler) JobsPostHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -60,14 +64,17 @@ func (k *kafkaP) saveJobToKafka(job model.Job) error {
 		return err
 	}
 
-	for _, word := range []string{string(d)} {
-		k.Produce(&kafka.Message{
-			TopicPartition: kafka.TopicPartition{Topic: &k.KAFKATOPIC, Partition: kafka.PartitionAny},
-			Value:          []byte(word),
-		}, nil)
+	msg := kafka.Message{
+		Key:   []byte(fmt.Sprintf("key-%d", k.counter)),
+		Value: d,
+	}
+
+	err = k.WriteMessages(context.Background(), msg)
+	if err != nil {
+		return err
 	}
 
 	// k.Close()
-	log.Println("The job event has been created successfully")
+
 	return nil
 }
