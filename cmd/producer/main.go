@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/config"
+	"github.com/hrojas2021/go-kafka-mongodb/pkg/handler"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/iface"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/confluentic"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/sarama"
@@ -21,10 +22,12 @@ import (
 
 func main() {
 	cf := config.LoadViperConfig()
-	handler, err := getBroker(cf)
+	broker, err := getBroker(cf)
 	if err != nil {
 		log.Fatal("unable to create a kafka producer handler ", err)
 	}
+
+	handler := handler.NewProducerHandler(cf, broker)
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/jobs", handler.JobsPostHandler).Methods("POST")
@@ -40,6 +43,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
@@ -53,20 +57,21 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
-
 }
 
-func getBroker(cf *config.Configuration) (iface.ProducerHandler, error) {
-	var broker iface.ProducerHandler
+func getBroker(cf *config.Configuration) (iface.KafkaProducer, error) {
+	var broker iface.KafkaProducer
 	var err error
 
 	switch cf.BROKER {
 	case config.Sarama:
-		broker, err = sarama.NewProducerHandler(cf)
+		broker, err = sarama.NewKafkaProducer(cf)
 	case config.Confluentic:
-		broker, err = confluentic.NewProducerHandler(cf)
+		broker, err = confluentic.NewKafkaProducer(cf)
+	case config.Segmentio:
+		broker, err = segmentio.NewKafkaProducer(cf)
 	default:
-		broker, err = segmentio.NewProducerHandler(cf)
+		err = errors.New("the kafka broker was not found")
 	}
 
 	return broker, err

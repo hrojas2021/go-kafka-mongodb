@@ -4,60 +4,32 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/config"
+	"github.com/hrojas2021/go-kafka-mongodb/pkg/iface"
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/model"
 	"github.com/segmentio/kafka-go"
 )
 
-type producerHandler struct {
-	kafkaP kafkaP
-}
-
 type kafkaP struct {
-	*kafka.Writer
+	producer *kafka.Writer
 	*config.Configuration
 	counter int
 }
 
-func NewProducerHandler(cf *config.Configuration) (*producerHandler, error) {
+func NewKafkaProducer(cf *config.Configuration) (iface.KafkaProducer, error) {
 	w := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: []string{cf.KAFKAURL},
 		Topic:   cf.KAFKATOPIC,
 	})
 
-	return &producerHandler{
-		kafkaP: kafkaP{w, cf, 1},
+	return &kafkaP{
+		w, cf, 0,
 	}, nil
 }
 
-func (h *producerHandler) JobsPostHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Fatal("unable to read the payload ", err)
-	}
-	defer r.Body.Close()
-
-	var job model.Job
-	err = json.Unmarshal(body, &job)
-	if err != nil {
-		log.Fatal("unable to unmarshall the body ", err)
-	}
-
-	err = h.kafkaP.saveJobToKafka(job)
-	if err != nil {
-		log.Fatal("unable to produce the event  ", err)
-	}
-
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(body)
-}
-
-func (k *kafkaP) saveJobToKafka(job model.Job) error {
+func (k *kafkaP) SaveJobToKafka(job model.Job) error {
 	d, err := json.Marshal(job)
 	if err != nil {
 		return err
@@ -68,7 +40,7 @@ func (k *kafkaP) saveJobToKafka(job model.Job) error {
 		Value: d,
 	}
 
-	err = k.WriteMessages(context.Background(), msg)
+	err = k.producer.WriteMessages(context.Background(), msg)
 	if err != nil {
 		return err
 	}
@@ -77,6 +49,7 @@ func (k *kafkaP) saveJobToKafka(job model.Job) error {
 	return nil
 }
 
-func (h *producerHandler) Close() error {
-	return h.kafkaP.Close()
+func (k *kafkaP) Close() error {
+	log.Printf("Closing segmentio produder")
+	return k.producer.Close()
 }
