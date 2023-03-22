@@ -8,10 +8,9 @@ import (
 )
 
 func (db *DB) SaveJob(job *model.Job) error {
-	// return db.collection.Insert(job)
 	log.Println("Saving job to MongoDB")
-	col := db.client.Database("kafka").Collection("jobs")
-	_, err := col.InsertOne(context.Background(), job)
+	coll := db.client.Database("dockerKafka").Collection("jobs")
+	_, err := coll.InsertOne(context.Background(), job)
 	if err != nil {
 		return err
 	}

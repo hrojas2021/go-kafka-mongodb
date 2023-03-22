@@ -38,6 +38,28 @@ services:
       - zookeeper
     networks:
       - products_network
+  mongodb:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGODB_DATABASE: dockerKafka
+    ports:
+      - 27018:27018
+    volumes:
+      - mongodb_data_container:/data/db
+    networks:
+      - products_network
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - 8081:8081
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: example
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27018/
+volumes:
+  mongodb_data_container:
 networks:
   products_network:
     driver: bridge

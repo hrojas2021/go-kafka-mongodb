@@ -1,4 +1,4 @@
-run-containers:
+init-containers:
 	docker compose up --build -d
 
 start-zookeeper:
@@ -12,3 +12,12 @@ run-producer:
 
 run-consumer:
 	go run cmd/consumer/main.go
+
+stop-containers:
+	docker compose down --remove-orphans
+
+send-request:
+	curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"title": "Golang Boss Engineer in Docker","description": "This a Boss position for Docker","company": "Sarama Docker","salary": "70.000"}' \
+  http://localhost:9600/jobs
