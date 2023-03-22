@@ -20,6 +20,12 @@ import (
 	"github.com/hrojas2021/go-kafka-mongodb/pkg/kafka/segmentio"
 )
 
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 func main() {
 	cf := config.LoadViperConfig()
 	broker, err := getBroker(cf)
@@ -29,7 +35,21 @@ func main() {
 
 	handler := handler.NewProducerHandler(cf, broker)
 
+	// docs.SwaggerInfo.Title = "Swagger Example API"
+	// docs.SwaggerInfo.Description = "This is a sample server Petstore server."
+	// docs.SwaggerInfo.Version = "1.0"
+	// docs.SwaggerInfo.Host = "localhost:9600"
+	// docs.SwaggerInfo.BasePath = "/v2"
+	// docs.SwaggerInfo.Schemes = []string{"http", "https"}
+
 	router := mux.NewRouter().StrictSlash(true)
+	// router.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
+	// 	httpSwagger.URL("http://localhost:9600/swagger/doc.json"), //The url pointing to API definition
+	// 	httpSwagger.DeepLinking(true),
+	// 	httpSwagger.DocExpansion("none"),
+	// 	httpSwagger.DomID("#swagger-ui"),
+	// )).Methods(http.MethodGet)
+
 	router.HandleFunc("/jobs", handler.JobsPostHandler).Methods("POST")
 
 	log.Println("Server starting in localhost:", cf.PORT)

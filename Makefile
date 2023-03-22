@@ -1,3 +1,6 @@
+run-containers:
+	docker compose up --build -d
+
 start-zookeeper:
 	zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties
 
