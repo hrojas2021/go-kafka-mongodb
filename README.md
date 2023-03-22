@@ -2,8 +2,6 @@ Phase I
 
 # mark Segmentio messages
 
-# update README.md
-
 Phase II
 
 # Add more features (channels)
